@@ -1,0 +1,14 @@
+D:\MyCode\.NET-P\CSharpBasics\bin\Debug\net10.0\CSharpBasics.exe
+D:\MyCode\.NET-P\CSharpBasics\bin\Debug\net10.0\CSharpBasics.deps.json
+D:\MyCode\.NET-P\CSharpBasics\bin\Debug\net10.0\CSharpBasics.runtimeconfig.json
+D:\MyCode\.NET-P\CSharpBasics\bin\Debug\net10.0\CSharpBasics.dll
+D:\MyCode\.NET-P\CSharpBasics\bin\Debug\net10.0\CSharpBasics.pdb
+D:\MyCode\.NET-P\CSharpBasics\obj\Debug\net10.0\CSharpBasics.GeneratedMSBuildEditorConfig.editorconfig
+D:\MyCode\.NET-P\CSharpBasics\obj\Debug\net10.0\CSharpBasics.AssemblyInfoInputs.cache
+D:\MyCode\.NET-P\CSharpBasics\obj\Debug\net10.0\CSharpBasics.AssemblyInfo.cs
+D:\MyCode\.NET-P\CSharpBasics\obj\Debug\net10.0\CSharpBasics.csproj.CoreCompileInputs.cache
+D:\MyCode\.NET-P\CSharpBasics\obj\Debug\net10.0\CSharpBasics.dll
+D:\MyCode\.NET-P\CSharpBasics\obj\Debug\net10.0\refint\CSharpBasics.dll
+D:\MyCode\.NET-P\CSharpBasics\obj\Debug\net10.0\CSharpBasics.pdb
+D:\MyCode\.NET-P\CSharpBasics\obj\Debug\net10.0\CSharpBasics.genruntimeconfig.cache
+D:\MyCode\.NET-P\CSharpBasics\obj\Debug\net10.0\ref\CSharpBasics.dll

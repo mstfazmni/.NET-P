@@ -1,0 +1,128 @@
+1: Created a local sql server on Docker then connected my SQL server extention in VS code to it locally.
+
+2: Created Boxing Database with some tables and fields
+
+3: Created my ASP.NET Core Web API for HTTP requests
+
+4: Created Swagger to have a UI for my HTTP requests 
+(Why did we need Swashbuckle/Swagger at all?
+Without it, your API works fine — but you'd have no way to test it except writing a separate program to send HTTP requests, or using a tool like Postman. Swagger auto-generates a webpage that reads your code and builds a clickable interface for every endpoint. It's not part of your actual app logic — it's a developer convenience tool, purely for testing/documentation. Interviewers ask about it because "how do you test your API locally" is a very common question, and "Swagger UI" is the expected answer.)
+
+****************************************************************
+What is a controller's job, really?
+
+Think of a restaurant. A customer (your React app, or a browser, or Swagger) doesn't walk into the kitchen and grab food themselves — they talk to a waiter. They say "I'd like the athlete with id 1," the waiter goes and gets it, and brings it back.
+
+A controller is the waiter. Its whole job is: listen for incoming requests, figure out what's being asked for, go get/prepare the answer, and hand back a response. That's it. It's the "front desk" of your application — the thing that receives requests from the outside world and replies to them.
+
+csharp
+public class AthletesController : ControllerBase
+
+This class is your "Athletes waiter" — it only handles requests related to athletes. If you had orders/payments, you'd have a separate OrdersController — a different waiter for a different job. This separation is why controllers exist as their own concept — keeping "athlete stuff" and "order stuff" in different, clearly-named places.
+
+****************************************************************
+What is IActionResult, in plain terms?
+
+Every request needs a response — and that response has two parts: a status (did it work? was it not found? was something wrong with the request?) and the actual content (the data itself, if any).
+
+IActionResult is just the umbrella term/box for "an HTTP response, whatever kind it ends up being." It's not one specific thing — it's a category. Ok(...), NotFound(), BadRequest() are all different kinds of response, but they all fit inside that same box called IActionResult. Your method's return type says "I promise to hand back some HTTP response" — without committing in advance to exactly which one, since that depends on what happens inside the method (found it? didn't find it?).
+
+Real-world analogy: the waiter always brings back something — but it's either "here's your food" (200 OK) or "sorry, that's not on the menu" (404 Not Found). IActionResult is just saying "the waiter will bring back one of these possible outcomes," without saying in advance which one.
+
+****************************************************************
+Where did we even "call" a method?
+
+This is the part that's genuinely invisible, and it's worth naming clearly: you never call these methods yourself. ASP.NET Core's framework calls them for you, automatically, whenever a matching HTTP request comes in.
+
+Here's the actual flow when you clicked "Execute" in Swagger for /api/athletes/1:
+
+Swagger sends an HTTP GET request to http://localhost:5213/api/athletes/1
+ASP.NET Core's routing system (running invisibly in the background since you called dotnet run) looks at that incoming URL
+It scans all your controllers for a matching [Route] + [HttpGet("{id}")] combination
+It finds AthletesController.GetAthleteById(int id) matches
+The framework itself calls that method for you — behind the scenes, roughly like: new AthletesController().GetAthleteById(1)
+Whatever IActionResult your method returns gets converted into an actual real HTTP response and sent back to whoever asked (Swagger, in this case)
+
+That's the biggest mental shift moving from console apps to web APIs: you're not calling your own code — you're writing code that the framework calls on your behalf, whenever the right kind of request shows up.
+
+****************************************************************
+ou write C# code, and EF Core translates it into SQL behind the scenes, then converts the results back into real C# objects automatically.
+This connects directly back to the LINQ lesson from before — remember how .Where(), .Select() worked on in-memory lists? EF Core lets you use those exact same LINQ methods, except now they run against your actual SQL database instead of a list sitting in memory.
+
+Real-world analogy: think of EF Core as a translator standing between you and the database. You speak C#, the database speaks SQL — EF Core translates in both directions so you never have to write SQL by hand for everyday operations.
+
+Exactly — you're thinking of an ORM (Object-Relational Mapper), and EF Core is Microsoft's ORM for .NET. Same category of tool as Prisma, Sequelize, or TypeORM in the Node world — same underlying idea: write code in your app's language, and the tool translates to/from SQL automatically. Genuinely good instinct to connect these — if you've used Prisma or Sequelize before, EF Core will feel structurally familiar even though the syntax is different.
+
+****************************************************************
+
+EF core:
+Install the packages
+bash
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer
+dotnet add package Microsoft.EntityFrameworkCore.Design
+dotnet add package Microsoft.EntityFrameworkCore.Tools
+SqlServer — the specific provider for SQL Server (there'd be a different package for PostgreSQL or MySQL — same pattern as Prisma having different providers per database)
+Design/Tools — enable the migrations tooling (we'll get to that — it's like Prisma's migrate commands)
+
+Create your model class
+
+Create the DbContext — this is EF Core's core concept ->
+What a DbContext actually is, in plain English: it's your "connection point" to the whole database — the single object your code talks to whenever it wants to read or write data. DbSet<Athlete> Athletes specifically represents your Athletes table — EF Core matches the property name Athletes to the table Athletes by convention (same idea as Prisma's generated client giving you prisma.athlete.findMany()).
+
+Register the connection string
+
+****************************************************************
+The problem migrations solve
+
+Right now, your database tables exist because you manually ran CREATE TABLE SQL. But going forward, if you add a new property to your Athlete class (say, public string Nickname { get; set; }), your C# code and your actual database table would be out of sync — the class expects a column that doesn't exist yet. Migrations are how EF Core keeps your code and your database schema in sync, generating the SQL for you instead of you hand-writing ALTER TABLE statements.
+
+Why this matters for teams (a good interview answer): migrations are version-controlled, incremental, and repeatable — every developer on a team runs the same migrations in the same order, so everyone's local database (and every environment — staging, production) ends up with an identical schema, without anyone needing to manually remember what changed.
+****************************************************************
+This is actually a good thing to understand deeply for interviews: EF Core's migrations are driven entirely by your C# model — it's not scanning your old database and copying its structure. The migration is "make the real database match what my C# classes say it should look like.
+
+****************************************************************
+Redux:
+
+This is the actual value proposition of Redux, stated plainly: it trades "carefully tracing props through every layer of the component tree" for "any component can talk directly to one central place." The tradeoff is some extra setup (store, actions, reducers)
+
+react-redux is the separate library that connects Redux's store to React components specifically (useSelector, useDispatch) — Redux itself is framework-agnostic; react-redux is the React-specific glue.
+
+Redux's entire purpose: let any component talk directly to where the data lives, no matter how deep it is in your component tree — skip all the passing-through-the-middle.
+
+The Store — just a box holding data, sitting outside your components
+
+Why can't components just read/write that object directly?
+
+Technically nothing stops the object from existing — the problem is React needs to know when data changes, so it knows when to re-render something on screen. If you just changed a plain object directly (store.athletes[0].wins = 5), React would have no idea anything happened — the screen wouldn't update. Redux needs a controlled way to change data, so it can notify components "hey, something changed, re-render."
+
+That's the actual reason for the next two pieces — they're not decoration, they solve this specific problem.
+
+Action — literally just a message describing "this happened"
+
+{ type: 'athlete/winRecorded', payload: 'Canelo' }
+
+This is nothing more than a plain object saying, in words: "the event called winRecorded happened, and it was about Canelo." It does not change anything by itself. It's just a note — think of it like filling out a request form and dropping it in a mailbox. Writing the form doesn't do anything on its own; someone still has to read it and act on it.
+
+dispatch — the mailbox itself
+dispatch({ type: 'athlete/winRecorded', payload: 'Canelo' })
+
+dispatch is the only way to send that "note" into Redux. This is the one and only door into the store. You never change the store directly — you always send a note through this door, describing what happened.
+
+Reducer — the person who reads the note and updates the store
+winRecorded: (state, action) => {
+  const athlete = state.find(a => a.name === action.payload);
+  athlete.wins += 1;
+}
+
+This function's whole job: receive the current data + the note (action), and produce the updated data. In your case: "the note says Canelo — go find Canelo in the list, and bump his wins by one." This is the only place in your entire app allowed to actually change this data. Every other piece of code just sends notes (dispatch) — this function is the one doing the real work.
+
+Why funnel every change through one function instead of letting components change data directly? Because now there's exactly one place to look if something about athletes data is wrong — not scattered across 10 different components each doing their own version of "update wins." That's the actual payoff: predictability. One door in (dispatch), one place that does the actual editing (reducer).
+
+useSelector — how a component reads from the store
+const wins = useSelector(state => state.athletes.find(a => a.name === name).wins);
+
+Plain English: "give me this specific piece of data from the store, and automatically re-render me whenever it changes." This is React-Redux's way of connecting "the store" (which lives outside React) to "this component" (which lives inside React) — it's the wire between the two worlds.
+
+RTK Query — connecting your real backend
+
+RTK Query is built into @reduxjs/toolkit (you already installed it) — it's a specialized tool for exactly one job: fetching and caching data from an API, while automatically managing loading states, errors, and re-fetching, so you don't hand-write that logic yourself every time.

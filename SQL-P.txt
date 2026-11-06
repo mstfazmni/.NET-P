@@ -1,0 +1,32 @@
+CREATE TABLE Athletes (
+
+	Id INT PRIMARY KEY IDENTITY(1,1)
+	Name NAVCHAR(100) NOT NULL,
+	WeightClass NAVCHAR(50),
+	Wins INT DEFAULT 0,
+	Losses INT DEFAULT 0
+);
+
+
+CREATE TABLE TrainingPlans (
+	Id INT PRIMATY KEY IDENTITY(1,1),
+	AthleteId INT NOT NULL,
+	PlanName NAVCHAR(100),
+	FOREIGN KEY (AthleteId) REFERENCES Athlete(Id)
+)
+
+
+// Exercise
+
+INSERT INTO Athletes (Name, WeightClass, Wins, Losses)
+VALUES ('Mostafa', 'Lightheavy', 8, 2);
+
+INSERT INTO Athletes (Name, WeightClass, Wins, Losses)
+VALUES ('Floyd', 'Superlight', 50, 0);
+
+INSERT INTO TrainingPlans (AthleteId, PlanName)
+VALUES (1, 'Winning_Games');
+
+SELECT Athletes.Name, TrainingPlans.PlanName
+FROM Athletes
+LEFT JOIN TrainingPlans ON Athletes.Id = TrainingPlans.AthleteId;
